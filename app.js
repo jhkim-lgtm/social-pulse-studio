@@ -12,6 +12,9 @@
   };
 
   const images = {
+    brandDefault: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=900&q=82',
+    brandProduct: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=900&q=82',
+    brandCampaign: 'https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=900&q=82',
     fashion: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=900&q=82',
     object: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=82',
     portrait: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=900&q=82',
@@ -41,11 +44,24 @@
     { id: 12, platform: 'YouTube Shorts', creator: '@design.minute', avatar: 'DM', title: '공간의 핵심 디테일 하나만 설명하는 20초 포맷', velocity: 134, score: 78, views: 318000, likes: 22400, age: '2시간 전', image: images.interior, source: '공개 채널 샘플' }
   ];
 
+  /* 정적 데모의 가상 계정에는 플랫폼 원문 URL을 꾸며 넣지 않는다. 실제 연동 데이터만 originalUrl을 가진다. */
+  discoveryItems.forEach(item => {
+    Object.assign(item, {
+      mode: 'demo',
+      mediaType: 'image',
+      previewUrl: item.image,
+      originalUrl: null,
+      assetUrl: item.image,
+      rightsStatus: 'reference-only'
+    });
+  });
+
   const state = {
     activeView: 'overview',
     platform: 'all',
     query: '',
     sort: 'viral',
+    detailId: null,
     selected: Number(localStorage.getItem(STORAGE.selected)) || null,
     sources: readJSON(STORAGE.sources, []),
     queue: readJSON(STORAGE.queue, null) || defaultQueue(),
@@ -53,6 +69,15 @@
     weekOffset: 0,
     studio: readJSON(STORAGE.studio, { format: 'feed', layout: 'editorial', color: '#2768ff', align: 'left', zoom: 80 })
   };
+
+  /* 이전 데모가 Discovery 원본을 예약 썸네일로 복사했던 로컬 데이터도 브랜드 전용 자산으로 안전하게 이전한다. */
+  const defaultQueueImages = { 101: images.brandDefault, 102: images.brandProduct, 103: images.brandCampaign };
+  state.queue = state.queue.map(entry => {
+    if (defaultQueueImages[entry.id]) return { ...entry, image: defaultQueueImages[entry.id] };
+    const source = discoveryItems.find(item => item.id === entry.creative?.sourceId);
+    return source && entry.image === source.image ? { ...entry, image: images.brandDefault } : entry;
+  });
+  saveJSON(STORAGE.queue, state.queue);
 
   const $ = (selector, parent = document) => parent.querySelector(selector);
   const $$ = (selector, parent = document) => [...parent.querySelectorAll(selector)];
@@ -94,9 +119,9 @@
 
   function defaultQueue() {
     return [
-      { id: 101, title: '좋은 브랜드는 한눈에 기억됩니다', channels: ['Instagram'], platform: 'Instagram', date: dateFromToday(0), time: '19:00', format: '릴스', image: images.interior, demo: true },
-      { id: 102, title: '브랜드 헤리티지 카드 #08', channels: ['Instagram', 'TikTok'], platform: 'Instagram', date: dateFromToday(1), time: '11:30', format: '피드', image: images.object, demo: true },
-      { id: 103, title: '우리가 공간을 고르는 기준', channels: ['YouTube'], platform: 'YouTube', date: dateFromToday(3), time: '18:00', format: '쇼츠', image: images.architecture, demo: true }
+      { id: 101, title: '좋은 브랜드는 한눈에 기억됩니다', channels: ['Instagram'], platform: 'Instagram', date: dateFromToday(0), time: '19:00', format: '릴스', image: images.brandDefault, demo: true },
+      { id: 102, title: '브랜드 헤리티지 카드 #08', channels: ['Instagram', 'TikTok'], platform: 'Instagram', date: dateFromToday(1), time: '11:30', format: '피드', image: images.brandProduct, demo: true },
+      { id: 103, title: '우리가 공간을 고르는 기준', channels: ['YouTube'], platform: 'YouTube', date: dateFromToday(3), time: '18:00', format: '쇼츠', image: images.brandCampaign, demo: true }
     ];
   }
 
@@ -145,6 +170,16 @@
     document.documentElement.dataset.theme = theme;
     localStorage.setItem(STORAGE.theme, theme);
     $('#themeToggle').setAttribute('aria-label', theme === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환');
+    applyBrandLogos();
+  }
+
+  function applyBrandLogos() {
+    const logos = window.BRAND_LOGOS || {};
+    $$('img[data-brand-logo]').forEach(image => {
+      const requested = image.dataset.brandLogo;
+      const variant = requested === 'auto' ? (document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark') : requested;
+      if (logos[variant]) image.src = logos[variant];
+    });
   }
 
   function renderDiscovery() {
@@ -166,7 +201,7 @@
       const cls = platformClass(item.platform);
       return `
         <article class="discovery-card" data-id="${item.id}">
-          <div class="discovery-media" style="background-image:url('${item.image}')" tabindex="0" role="button" aria-label="${escapeHTML(item.title)} 편집하기">
+          <div class="discovery-media" style="background-image:url('${item.image}')" tabindex="0" role="button" aria-label="${escapeHTML(item.title)} 원본 보기">
             <span class="card-platform"><i class="${cls}"></i>${escapeHTML(item.platform)}</span>
             <span class="viral-badge"><span>VIRAL</span><b>${item.score}</b></span>
             <span class="velocity-badge"><svg><use href="#i-bolt"/></svg>+${item.velocity}/분</span>
@@ -177,17 +212,22 @@
             <h3>${escapeHTML(item.title)}</h3>
             <div class="card-stats"><span><svg><use href="#i-play"/></svg>${formatNumber(item.views)}</span><span><svg><use href="#i-heart"/></svg>${formatNumber(item.likes)}</span><span><svg><use href="#i-trend"/></svg>${((item.likes / item.views) * 100).toFixed(1)}%</span></div>
             <div class="source-badges"><span class="source-badge snapshot">1분 snapshot 차분</span><span class="source-badge">10분 관측</span><span class="source-badge">방금 전 갱신</span><span class="source-badge">${escapeHTML(item.source)}</span><span class="source-badge rights">권리 확인 필요</span></div>
-            <button class="card-action"><svg><use href="#i-edit"/></svg>구조를 참고해 새로 만들기</button>
+            <div class="card-actions">
+              <button class="card-original"><svg><use href="#i-play"/></svg>원본 보기</button>
+              <button class="card-action"><svg><use href="#i-edit"/></svg>Studio에서 만들기</button>
+            </div>
           </div>
         </article>`;
     }).join('');
 
     $$('.discovery-card').forEach(card => {
-      const select = () => selectDiscovery(Number(card.dataset.id));
-      $('.card-action', card).addEventListener('click', select);
-      $('.discovery-media', card).addEventListener('click', select);
+      const id = Number(card.dataset.id);
+      const open = () => openDiscoveryDetail(id);
+      $('.card-action', card).addEventListener('click', open);
+      $('.card-original', card).addEventListener('click', open);
+      $('.discovery-media', card).addEventListener('click', open);
       $('.discovery-media', card).addEventListener('keydown', event => {
-        if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); select(); }
+        if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(); }
       });
     });
   }
@@ -199,7 +239,7 @@
         <span class="signal-item-copy"><strong>${escapeHTML(item.title)}</strong><span>${escapeHTML(item.platform)} · ${escapeHTML(item.creator)}</span></span>
         <span class="velocity"><b>+${item.velocity}/분</b><small>좋아요 증가</small></span>
       </button>`).join('');
-    $$('[data-signal-id]').forEach(button => button.addEventListener('click', () => selectDiscovery(Number(button.dataset.signalId))));
+    $$('[data-signal-id]').forEach(button => button.addEventListener('click', () => openDiscoveryDetail(Number(button.dataset.signalId))));
   }
 
   function setupDiscoveryFilters() {
@@ -223,14 +263,60 @@
     showToast('Studio로 가져왔어요', '원본을 재사용하지 않고 구조와 아이디어만 참고합니다.');
   }
 
+  function openDiscoveryDetail(id) {
+    const item = discoveryItems.find(entry => entry.id === id);
+    if (!item) return;
+    state.detailId = id;
+    const cls = platformClass(item.platform);
+    $('#originalPreview').style.backgroundImage = `url('${item.previewUrl}')`;
+    $('#originalPreview').classList.toggle('is-video', item.mediaType === 'video');
+    $('#originalPlatform').innerHTML = `<i class="${cls}"></i>${escapeHTML(item.platform)}`;
+    $('#originalStatus').textContent = item.mode === 'live' ? 'LIVE SOURCE' : 'DEMO SAMPLE';
+    $('#originalStatus').classList.toggle('live', item.mode === 'live');
+    $('#originalAvatar').textContent = item.avatar;
+    $('#originalCreator').textContent = item.creator;
+    $('#originalAge').textContent = `· ${item.age}`;
+    $('#originalContentTitle').textContent = item.title;
+    $('#originalViews').textContent = formatNumber(item.views);
+    $('#originalLikes').textContent = formatNumber(item.likes);
+    $('#originalVelocity').textContent = `+${item.velocity}/분`;
+    $('#originalScore').textContent = item.score;
+    $('#originalSource').textContent = item.source;
+    $('#originalRightsCopy').textContent = item.mode === 'live'
+      ? '수집된 원문 링크입니다. 제작 전 저작권과 플랫폼 정책을 확인하세요.'
+      : '실제 플랫폼 게시물이 아닌 UI 시연용 샘플입니다. 아래 링크는 샘플 이미지 출처로 연결됩니다.';
+    const external = $('#originalExternalLink');
+    const href = item.originalUrl || item.assetUrl;
+    external.hidden = !href;
+    if (href) external.href = href;
+    $('span', external).textContent = item.originalUrl ? '플랫폼 원본 콘텐츠 보기' : '샘플 원본 이미지 보기';
+    const dialog = $('#discoveryDetailModal');
+    if (!dialog.open) dialog.showModal();
+  }
+
+  function setupDiscoveryDetail() {
+    $('#useDiscoveryReference').addEventListener('click', () => {
+      const id = state.detailId;
+      $('#discoveryDetailModal').close();
+      if (id) selectDiscovery(id);
+    });
+    $('#viewOriginalReference').addEventListener('click', () => {
+      if (state.selected) openDiscoveryDetail(state.selected);
+    });
+  }
+
   function updateStudioReference() {
     const item = discoveryItems.find(entry => entry.id === state.selected);
     if (item) {
       $('#inspirationThumb').style.backgroundImage = `url('${item.image}')`;
       $('#inspirationTitle').textContent = item.title;
       $('#inspirationMeta').textContent = `Viral ${item.score} · +${item.velocity}/분 · ${item.platform} · 구조 분석용`;
+      $('#viewOriginalReference').hidden = false;
+    } else {
+      $('#viewOriginalReference').hidden = true;
     }
-    const previewImage = state.studio.customImage || item?.image || images.interior;
+    /* 레퍼런스 원본은 작은 참고 썸네일에만 두고 제작 캔버스에는 재사용하지 않는다. */
+    const previewImage = state.studio.customImage || images.brandDefault;
     $('.canvas-image').style.backgroundImage = `url('${previewImage}')`;
   }
 
@@ -387,6 +473,7 @@
     $$('[data-layout]').forEach(button => button.classList.toggle('active', button.dataset.layout === state.studio.layout));
     $$('.color-swatch').forEach(button => button.classList.toggle('active', button.dataset.color === state.studio.color));
     $$('[data-align]').forEach(button => button.classList.toggle('active', button.dataset.align === state.studio.align));
+    applyBrandLogos();
     saveJSON(STORAGE.studio, state.studio);
   }
 
@@ -472,11 +559,10 @@
       const data = new FormData(form);
       const channels = data.getAll('channel');
       if (!channels.length) { showToast('채널을 선택해주세요', '데모 예약에 사용할 채널이 필요해요.', false); return; }
-      const item = discoveryItems.find(entry => entry.id === state.selected);
       state.queue.unshift({
         id: Date.now(), title: $('#hookInput').value.trim().slice(0, 50) || data.get('caption').split('\n')[0].slice(0, 50) || '새 콘텐츠', channels,
         platform: channels[0], date: data.get('date'), time: data.get('time'), format: state.studio.format === 'reel' ? '릴스' : '피드',
-        image: state.studio.customImage || item?.image || images.interior, demo: true,
+        image: state.studio.customImage || images.brandDefault, demo: true,
         creative: {
           sourceId: state.selected, layout: state.studio.layout, color: state.studio.color, align: state.studio.align,
           hook: $('#hookInput').value, caption: data.get('caption'), tone: $('#toneSelect').value
@@ -502,6 +588,8 @@
     form.elements.date.value = dateFromToday(1);
     form.elements.time.value = '19:00';
     form.elements.caption.value = $('#captionInput').value;
+    $('.media-preview-small > div').style.backgroundImage = `url('${state.studio.customImage || images.brandDefault}')`;
+    $('.media-preview-small small').textContent = state.studio.format === 'reel' ? '1080 × 1920 · 릴스' : '1080 × 1350 · 피드';
     openModal('scheduleModal');
   }
 
@@ -602,6 +690,7 @@
     setupTheme();
     setupNavigation();
     setupDiscoveryFilters();
+    setupDiscoveryDetail();
     setupStudio();
     setupModals();
     setupSources();
