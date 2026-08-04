@@ -1,0 +1,24 @@
+{
+  "_comment": "Discovery IG 버티컬 모니터링 계정. 1%CLUB 채널에 트위스트해 올릴 수 있는 콘텐츠 기준으로 큐레이션 (BK 2026-08-03). 계정 추가/삭제 후 tools/fetch_trending.py --only ig 재실행.",
+  "accounts": [
+    { "username": "eyesmag",             "label": "아이즈매거진",       "vertical": "패션" },
+    { "username": "dailyfashion_news",   "label": "데일리패션뉴스",     "vertical": "패션" },
+    { "username": "fastpapermag",        "label": "패스트페이퍼",       "vertical": "패션" },
+    { "username": "voguekorea",          "label": "보그 코리아",        "vertical": "패션" },
+    { "username": "allurekorea",         "label": "얼루어 코리아",      "vertical": "뷰티" },
+    { "username": "cosmopolitankorea",   "label": "코스모폴리탄",       "vertical": "뷰티" },
+    { "username": "beautifulhotels",     "label": "Beautiful Hotels",  "vertical": "호텔" },
+    { "username": "hotelsandresorts",    "label": "Hotels & Destinations", "vertical": "호텔" },
+    { "username": "robbreport",          "label": "Robb Report",       "vertical": "럭셔리 라이프" },
+    { "username": "esquire.korea",       "label": "에스콰이어 코리아",  "vertical": "럭셔리 라이프" },
+    { "username": "tatlerasia",          "label": "Tatler Asia",       "vertical": "럭셔리 라이프" },
+    { "username": "louisvuitton",        "label": "Louis Vuitton",     "vertical": "럭셔리 브랜드" },
+    { "username": "gucci",               "label": "Gucci",             "vertical": "럭셔리 브랜드" },
+    { "username": "dior",                "label": "Dior",              "vertical": "럭셔리 브랜드" },
+    { "username": "cartier",             "label": "Cartier",           "vertical": "럭셔리 브랜드" },
+    { "username": "rollsroycecars",      "label": "Rolls-Royce",       "vertical": "자동차" },
+    { "username": "ferrari",             "label": "Ferrari",           "vertical": "자동차" },
+    { "username": "michelinguide",       "label": "미쉐린 가이드",      "vertical": "F&B" },
+    { "username": "moetchandon",         "label": "Moët & Chandon",    "vertical": "F&B" }
+  ]
+}
