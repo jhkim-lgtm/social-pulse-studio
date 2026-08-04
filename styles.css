@@ -473,3 +473,18 @@ html[data-theme="dark"] .platform-dot.tiktok, html[data-theme="dark"] .channel-l
 @media (prefers-reduced-motion: reduce) {
   *,*::before,*::after { scroll-behavior: auto !important; animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
 }
+
+/* ---- 실데이터(보유 채널) 미디어 재생 ---- */
+.source-badge.rights.owned { color: var(--green, #20b58b); }
+.canvas-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: saturate(.92) contrast(1.03); background: #000; }
+.canvas-video[hidden] { display: none; }
+.original-preview video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: #000; z-index: 1; }
+.original-preview video[hidden] { display: none; }
+.original-preview .card-platform, .original-preview .original-status { z-index: 2; }
+.original-play[hidden] { display: none !important; }
+
+/* ---- 트렌딩 해시태그 카드 ---- */
+.hashtag-media { background: linear-gradient(135deg, #2768ff 0%, #725cff 60%, #a44bff 100%); display: grid; place-items: center; }
+.hashtag-big { position: absolute; inset: 0; display: grid; place-items: center; z-index: 1; color: #fff; font-size: 30px; font-weight: 900; letter-spacing: -.02em; text-shadow: 0 4px 22px rgba(0,0,0,.35); padding: 16px; text-align: center; word-break: break-all; }
+.hashtag-big[hidden] { display: none; }
+.original-preview .hashtag-big { font-size: 40px; }

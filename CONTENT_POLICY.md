@@ -3,9 +3,10 @@
 ## Discovery to Studio
 
 - A Discovery card opens its original-content detail before editing.
-- The detail view must show the source, creator, observed metrics, rights notice, and a canonical original URL when a live connector provides one.
-- Demo records must be labelled as samples and must never invent a social-platform URL. Their external link may point only to the actual sample asset source.
-- Moving an item to Studio carries its structure and planning context, not the source image or video. The canvas and publishing queue use a brand-owned upload or the brand default asset.
+- The detail view must show the source, creator, observed metrics, rights notice, and a canonical original URL.
+- Discovery items are third-party trending content (`rightsStatus: 'reference-only'`) collected from official platform trend surfaces: TikTok Creative Center (regional weekly trending videos, KR trending hashtags) and the Douyin hot board. External links point to the real platform page (creator profile, hot-topic page, or hashtag page).
+- Purpose: spot fast-rising content early, source and plan from it, and remix it with a twist into brand-owned content. Moving an item to Studio loads its locally cached reference media onto the canvas as a drafting base. A local upload always overrides it.
+- Reference media on the canvas is for internal drafting only. Publishing anything that reuses original third-party footage, images, or audio requires rights clearance first; the UI must keep the "권리 확인 필요" notice on every reference item.
 
 ## 1%CLUB logo
 

@@ -8,6 +8,19 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%233182f6'/%3E%3Cpath d='M18 38V29m10 14V21m10 17V15m10 19V24' stroke='white' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://images.unsplash.com">
   <link rel="stylesheet" href="styles.css">
+  <script>
+    /* 공개 링크 간이 접근 게이트 (로컬 실행은 통과) */
+    (() => {
+      const host = location.hostname;
+      if (!host || host === 'localhost' || host === '127.0.0.1') return;
+      if (sessionStorage.getItem('pulse.gate') === 'ok') return;
+      const pw = prompt('PULSE 접근 비밀번호를 입력하세요');
+      if (pw === 'bk') { sessionStorage.setItem('pulse.gate', 'ok'); return; }
+      document.addEventListener('DOMContentLoaded', () => {
+        document.body.innerHTML = '<div style="display:grid;place-items:center;height:100vh;font-family:sans-serif;color:#8b95a1">접근이 제한된 페이지입니다.</div>';
+      });
+    })();
+  </script>
 </head>
 <body>
   <svg class="svg-sprite" aria-hidden="true">
@@ -47,7 +60,7 @@
 
       <nav class="main-nav">
         <button class="nav-item active" data-view="overview"><svg><use href="#i-home"/></svg><span>Overview</span></button>
-        <button class="nav-item" data-view="discovery"><svg><use href="#i-spark"/></svg><span>DISCOVERY</span><b class="nav-count">12</b></button>
+        <button class="nav-item" data-view="discovery"><svg><use href="#i-spark"/></svg><span>DISCOVERY</span><b class="nav-count" id="discoveryNavCount">12</b></button>
         <button class="nav-item" data-view="studio"><svg><use href="#i-edit"/></svg><span>Studio</span></button>
         <button class="nav-item" data-view="publish"><svg><use href="#i-calendar"/></svg><span>Publish</span><b class="nav-count muted" id="queueNavCount">3</b></button>
         <button class="nav-item" data-view="analytics"><svg><use href="#i-chart"/></svg><span>Analytics</span></button>
@@ -66,7 +79,7 @@
     <div class="content-shell">
       <header class="topbar">
         <div class="mobile-brand"><span class="brand-logo"><i></i><i></i><i></i></span><b>pulse</b></div>
-        <div class="topbar-status"><span class="live-dot"></span><span>데모 데이터</span><small>샘플 스냅샷 · 관측 10분 · 실제 연동 전</small></div>
+        <div class="topbar-status"><span class="live-dot"></span><span>트렌딩 스냅샷</span><small id="topbarFetchedAt">TikTok CC · Douyin 热点榜 · KR 해시태그</small></div>
         <div class="topbar-actions">
           <button class="theme-toggle" id="themeToggle" aria-label="다크 모드로 전환">
             <svg class="sun"><use href="#i-sun"/></svg><svg class="moon"><use href="#i-moon"/></svg>
@@ -85,7 +98,7 @@
 
           <div class="demo-banner">
             <div class="demo-icon"><svg><use href="#i-bolt"/></svg></div>
-            <div><strong>이 화면은 라이브 데모입니다</strong><p>현재 수치는 기능 체험용 샘플이에요. 계정을 연결하면 실제 채널과 경쟁사 데이터를 불러올 수 있어요.</p></div>
+            <div><strong>DISCOVERY는 외부 급상승 실데이터로 동작합니다</strong><p>패션·뷰티·호텔·럭셔리·자동차·F&amp;B 버티컬의 IG 계정 19곳을 좋아요 증가 속도로 모니터링하고, TikTok CC·Douyin 글로벌 시그널을 함께 수집합니다. 예약·광고 등 나머지 지표는 아직 데모입니다.</p></div>
             <button class="btn ghost" data-open="connectModal">데이터 연동하기<svg><use href="#i-arrow"/></svg></button>
           </div>
 
@@ -121,27 +134,31 @@
 
           <div class="discovery-summary">
             <div class="pulse-orbit"><span></span><i></i></div>
-            <div><span>샘플 감지 시나리오</span><strong><b>1,248</b>개 콘텐츠</strong></div>
+            <div><span>외부 급상승 실데이터</span><strong><b id="discoveryTotalCount">0</b>개 콘텐츠</strong></div>
             <div class="summary-divider"></div>
-            <div><span>분당 100+ 반응</span><strong><b>12</b>개 급상승</strong></div>
+            <div><span>패션 · 뷰티 · 호텔 · 럭셔리 · 자동차 · F&amp;B</span><strong><b>7</b>개 버티컬 + 글로벌 시그널</strong></div>
             <div class="summary-divider"></div>
             <div><span>연결된 소스</span><strong id="sourceSummary"><b>8</b>개 계정</strong></div>
           </div>
 
           <div class="filter-bar">
             <div class="search-field"><svg><use href="#i-search"/></svg><input id="discoverySearch" type="search" placeholder="계정, 키워드, 해시태그 검색" aria-label="콘텐츠 검색"></div>
-            <div class="platform-filters" role="group" aria-label="매체 필터">
+            <div class="platform-filters" role="group" aria-label="버티컬 필터">
               <button class="filter-chip active" data-platform="all">전체</button>
-              <button class="filter-chip" data-platform="Instagram"><span class="platform-dot instagram"></span>Instagram</button>
-              <button class="filter-chip" data-platform="TikTok"><span class="platform-dot tiktok"></span>TikTok</button>
-              <button class="filter-chip" data-platform="YouTube Shorts"><span class="platform-dot youtube"></span>YouTube</button>
-              <button class="filter-chip" data-platform="Douyin"><span class="platform-dot douyin"></span>Douyin</button>
+              <button class="filter-chip" data-platform="패션"><span class="platform-dot instagram"></span>패션</button>
+              <button class="filter-chip" data-platform="뷰티"><span class="platform-dot instagram"></span>뷰티</button>
+              <button class="filter-chip" data-platform="호텔"><span class="platform-dot instagram"></span>호텔</button>
+              <button class="filter-chip" data-platform="럭셔리 라이프"><span class="platform-dot instagram"></span>럭셔리 라이프</button>
+              <button class="filter-chip" data-platform="럭셔리 브랜드"><span class="platform-dot instagram"></span>럭셔리 브랜드</button>
+              <button class="filter-chip" data-platform="자동차"><span class="platform-dot instagram"></span>자동차</button>
+              <button class="filter-chip" data-platform="F&amp;B"><span class="platform-dot instagram"></span>F&amp;B</button>
+              <button class="filter-chip" data-platform="Global"><span class="platform-dot tiktok"></span>글로벌 시그널</button>
             </div>
-            <select id="discoverySort" class="select compact-select" aria-label="정렬 기준"><option value="viral">Viral score 순</option><option value="velocity">분당 좋아요 순</option><option value="views">조회수 순</option></select>
+            <select id="discoverySort" class="select compact-select" aria-label="정렬 기준"><option value="viral">Viral score 순</option><option value="views">조회·热度 순</option></select>
           </div>
 
-          <div class="result-meta"><span><b id="resultCount">12</b>개의 급상승 콘텐츠 · 1분 간격 metric snapshot 차분</span><span class="sample-label"><i></i>샘플 · 관측 10분 · 방금 전 갱신</span></div>
-          <div class="rights-note"><svg><use href="#i-link"/></svg><p><b>레퍼런스 이용 안내</b>경쟁 콘텐츠는 아이디어와 구조 분석용입니다. 원본 이미지·영상·음원을 재사용하지 않으며, 제작·게시 전 권리와 플랫폼 정책을 확인하세요.</p></div>
+          <div class="result-meta"><span><b id="resultCount">12</b>개의 급상승 콘텐츠 · 조회·热度는 각 플랫폼 공식 트렌드 보드 실측값</span><span class="sample-label"><i></i><span id="fetchedAtLabel">LIVE 스냅샷</span></span></div>
+          <div class="rights-note"><svg><use href="#i-link"/></svg><p><b>레퍼런스 이용 안내</b>외부 크리에이터의 급상승 콘텐츠입니다. 훅·구조·포맷을 분석해 우리 채널에 맞게 트위스트해 재제작하는 용도이며, 원본 요소를 그대로 쓰려면 게시 전 권리 확인이 필요합니다.</p></div>
           <div class="discovery-grid" id="discoveryGrid"></div>
           <div class="empty-state" id="discoveryEmpty" hidden><div><svg><use href="#i-search"/></svg></div><h3>조건에 맞는 콘텐츠가 없어요</h3><p>검색어 또는 매체 필터를 바꿔보세요.</p></div>
         </section>
@@ -166,7 +183,11 @@
                 <div class="field-group"><label for="toneSelect">브랜드 톤앤매너</label><select id="toneSelect" class="select"><option value="confident">간결하고 자신감 있게</option><option value="warm">따뜻하고 공감되게</option><option value="witty">위트 있고 경쾌하게</option><option value="premium">절제된 프리미엄</option></select></div>
                 <div class="field-group"><label for="goalSelect">콘텐츠 목표</label><select id="goalSelect" class="select"><option value="engagement">반응·저장 유도</option><option value="awareness">브랜드 인지도</option><option value="conversion">방문·구매 전환</option></select></div>
                 <div class="field-group"><div class="label-row"><label for="hookInput">첫 문장 / 훅</label><button class="mini-action" id="generateHook"><svg><use href="#i-spark"/></svg>추천</button></div><input id="hookInput" class="input" value="좋은 브랜드는, 한눈에 기억됩니다." maxlength="68"><small class="field-count"><b id="hookCount">24</b>/68</small></div>
-                <div class="field-group"><div class="label-row"><label for="captionInput">본문 카피</label><button class="mini-action" id="generateCopy"><svg><use href="#i-spark"/></svg>AI 카피 생성</button></div><textarea id="captionInput" class="textarea" rows="7">브랜드를 오래 기억하게 만드는 건 더 많은 말이 아니라, 단 하나의 선명한 장면입니다.\n\n우리만의 헤리티지를 지금의 감각으로 다시 보여주세요.\n\n#브랜드헤리티지 #브랜드콘텐츠 #1CLUB</textarea><small class="field-count"><b id="captionCount">102</b>/2,200</small></div>
+                <div class="field-group"><div class="label-row"><label for="captionInput">본문 카피</label><button class="mini-action" id="generateCopy"><svg><use href="#i-spark"/></svg>AI 카피 생성</button></div><textarea id="captionInput" class="textarea" rows="7">브랜드를 오래 기억하게 만드는 건 더 많은 말이 아니라, 단 하나의 선명한 장면입니다.
+
+우리만의 헤리티지를 지금의 감각으로 다시 보여주세요.
+
+#브랜드헤리티지 #브랜드콘텐츠 #1CLUB</textarea><small class="field-count"><b id="captionCount">102</b>/2,200</small></div>
               </div>
               <div class="control-pane" data-control-pane="design">
                 <div class="field-group"><label>레이아웃</label><div class="layout-options"><button class="layout-option active" data-layout="editorial"><i class="layout-a"></i><span>Editorial</span></button><button class="layout-option" data-layout="center"><i class="layout-b"></i><span>Centered</span></button><button class="layout-option" data-layout="minimal"><i class="layout-c"></i><span>Minimal</span></button></div></div>
@@ -229,7 +250,7 @@
           </div>
           <article class="panel channel-status-panel">
             <div class="panel-head"><div><span class="eyebrow">CONNECTED CHANNELS</span><h2>채널 상태</h2></div><button class="text-btn" data-open="connectModal">채널 관리<svg><use href="#i-chevron"/></svg></button></div>
-            <div class="channel-status-grid"><div><span class="channel-logo instagram">IG</span><p><strong>@1club.official</strong><small>Instagram · Demo connected</small></p><i class="online"></i></div><div><span class="channel-logo youtube">YT</span><p><strong>1CLUB</strong><small>YouTube · Demo</small></p><i class="online"></i></div><div><span class="channel-logo tiktok">TT</span><p><strong>@1club</strong><small>TikTok · Missing scope</small></p><button class="mini-action" data-open="connectModal">연결</button></div></div>
+            <div class="channel-status-grid"><div><span class="channel-logo instagram">IG</span><p><strong>@1club.kr</strong><small>Instagram · Graph API 연결됨</small></p><i class="online"></i></div><div><span class="channel-logo youtube">YT</span><p><strong>1CLUB</strong><small>YouTube · Demo</small></p><i class="online"></i></div><div><span class="channel-logo tiktok">TT</span><p><strong>@1club</strong><small>TikTok · Missing scope</small></p><button class="mini-action" data-open="connectModal">연결</button></div></div>
           </article>
         </section>
 
@@ -283,12 +304,12 @@
         <div class="original-info">
           <div class="creator-row"><span class="creator-avatar" id="originalAvatar">—</span><b id="originalCreator">—</b><span id="originalAge">—</span></div>
           <h3 id="originalContentTitle">—</h3>
-          <div class="original-metrics"><div><span>조회</span><b id="originalViews">—</b></div><div><span>좋아요</span><b id="originalLikes">—</b></div><div><span>증가 속도</span><b id="originalVelocity">—</b></div><div><span>Viral score</span><b id="originalScore">—</b></div></div>
+          <div class="original-metrics"><div><span id="originalViewsLabel">조회</span><b id="originalViews">—</b></div><div><span id="originalLikesLabel">좋아요</span><b id="originalLikes">—</b></div><div><span id="originalVelocityLabel">급상승</span><b id="originalVelocity">—</b></div><div><span>Viral score</span><b id="originalScore">—</b></div></div>
           <div class="info-box original-rights"><svg><use href="#i-link"/></svg><p><b id="originalSource">출처 확인</b><span id="originalRightsCopy">원본의 권리와 플랫폼 정책을 확인하세요.</span></p></div>
           <a class="btn secondary full" id="originalExternalLink" target="_blank" rel="noopener noreferrer"><svg><use href="#i-link"/></svg><span>원본 콘텐츠 보기</span></a>
         </div>
       </div>
-      <div class="modal-actions"><button class="btn secondary" value="cancel">닫기</button><button class="btn primary" type="button" id="useDiscoveryReference"><svg><use href="#i-edit"/></svg>이 구조로 Studio에서 만들기</button></div>
+      <div class="modal-actions"><button class="btn secondary" value="cancel">닫기</button><button class="btn primary" type="button" id="useDiscoveryReference"><svg><use href="#i-edit"/></svg>Studio에서 이어서 편집</button></div>
     </form>
   </dialog>
 
@@ -323,6 +344,7 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"><span><svg><use href="#i-check"/></svg></span><p><b id="toastTitle">저장했어요</b><small id="toastMessage">변경사항이 반영되었습니다.</small></p></div>
   <script src="brand-assets.js"></script>
+  <script src="assets/trending-content.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -29,32 +29,56 @@
     beauty: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=900&q=82'
   };
 
-  const discoveryItems = [
-    { id: 1, platform: 'Instagram', creator: '@atelier.seoul', avatar: 'AT', title: '제품 하나만 남겼더니 저장률이 3배 오른 비주얼', velocity: 428, score: 96, views: 884000, likes: 68200, age: '12분 전', image: images.object, source: '공개 프로필 샘플' },
-    { id: 2, platform: 'Douyin', creator: '@新消费研究所', avatar: 'DY', title: '0.5초마다 장면을 전환하는 제품 언박싱 구조', velocity: 391, score: 94, views: 2100000, likes: 148000, age: '18분 전', image: images.skincare, source: '데이터 파트너 샘플' },
-    { id: 3, platform: 'TikTok', creator: '@mono.objects', avatar: 'MO', title: '말 없이 손의 움직임만으로 완주율을 만든 영상', velocity: 356, score: 92, views: 1260000, likes: 93400, age: '23분 전', image: images.coffee, source: '공개 트렌드 샘플' },
-    { id: 4, platform: 'YouTube Shorts', creator: '@branddecoded', avatar: 'BD', title: '30년 브랜드 역사를 18초로 압축한 타임라인', velocity: 318, score: 91, views: 754000, likes: 51800, age: '31분 전', image: images.architecture, source: '공개 채널 샘플' },
-    { id: 5, platform: 'Instagram', creator: '@quiet.luxury.lab', avatar: 'QL', title: '텍스트를 7단어로 줄인 프리미엄 브랜드 릴스', velocity: 286, score: 89, views: 612000, likes: 46700, age: '36분 전', image: images.portrait, source: '공개 프로필 샘플' },
-    { id: 6, platform: 'TikTok', creator: '@wearitdaily', avatar: 'WD', title: '같은 옷을 7일간 입어본 리얼 후기 포맷', velocity: 264, score: 88, views: 982000, likes: 77100, age: '42분 전', image: images.fashion, source: '공개 트렌드 샘플' },
-    { id: 7, platform: 'Douyin', creator: '@品牌美学志', avatar: '美', title: '하나의 컬러만 반복해 기억점을 만든 캠페인', velocity: 239, score: 86, views: 1680000, likes: 121000, age: '48분 전', image: images.beauty, source: '데이터 파트너 샘플' },
-    { id: 8, platform: 'YouTube Shorts', creator: '@workbetter', avatar: 'WB', title: '전후 비교를 첫 화면에 배치한 생산성 쇼츠', velocity: 218, score: 85, views: 546000, likes: 39800, age: '54분 전', image: images.tech, source: '공개 채널 샘플' },
-    { id: 9, platform: 'Instagram', creator: '@slowtable', avatar: 'ST', title: '레시피보다 분위기를 먼저 보여준 푸드 콘텐츠', velocity: 196, score: 83, views: 438000, likes: 34600, age: '1시간 전', image: images.food, source: '공개 프로필 샘플' },
-    { id: 10, platform: 'TikTok', creator: '@breathwork.club', avatar: 'BC', title: '시청자가 함께 따라 하게 만드는 15초 루틴', velocity: 174, score: 82, views: 726000, likes: 54200, age: '1시간 전', image: images.wellness, source: '공개 트렌드 샘플' },
-    { id: 11, platform: 'Instagram', creator: '@stay.somewhere', avatar: 'SS', title: '여행지를 사람 대신 소리로 소개한 감각적 릴스', velocity: 151, score: 80, views: 391000, likes: 29700, age: '1시간 전', image: images.travel, source: '공개 프로필 샘플' },
-    { id: 12, platform: 'YouTube Shorts', creator: '@design.minute', avatar: 'DM', title: '공간의 핵심 디테일 하나만 설명하는 20초 포맷', velocity: 134, score: 78, views: 318000, likes: 22400, age: '2시간 전', image: images.interior, source: '공개 채널 샘플' }
-  ];
+  /* Discovery = 외부 급상승 콘텐츠 실데이터 (assets/trending-content.js, tools/fetch_trending.py로 수집).
+     소스: TikTok Creative Center(국가별 급상승 크리에이터 영상, 실제 미리보기 mp4 로컬 저장) ·
+     Douyin 热点榜(실시간 핫토픽) · TikTok CC KR 주간 해시태그.
+     목적: 터지는 콘텐츠를 빠르게 파악해 소싱/기획하고, 트위스트해 자사 채널 콘텐츠로 재제작. */
+  const discoveryItems = (window.TRENDING_DISCOVERY || []).map((raw, index) => {
+    const creator = raw.creator || '';
+    return {
+      id: index + 1,
+      platform: raw.platform,
+      group: raw.group || raw.platform,
+      vertical: raw.vertical || null,
+      creator,
+      creatorName: raw.creatorName || creator,
+      avatar: creator.replace(/^@/, '').slice(0, 2).toUpperCase() || 'TR',
+      title: raw.title,
+      hashtag: raw.hashtag || null,
+      topic: raw.topic || '',
+      views: raw.views || 0,
+      likes: raw.likes ?? null,
+      velocity: raw.velocity ?? null,
+      velocityLive: Boolean(raw.velocityLive),
+      rankValue: raw.rankValue ?? raw.views ?? 0,
+      metricLabel: raw.metricLabel || '보조 지표',
+      metricValue: raw.metricValue ?? '—',
+      badge: raw.badge || 'LIVE',
+      age: raw.age || '',
+      image: raw.poster,
+      previewUrl: raw.poster,
+      assetUrl: raw.asset,
+      originalUrl: raw.originalUrl,
+      mediaType: raw.mediaType,
+      mode: 'live',
+      rightsStatus: 'reference-only',
+      source: raw.source
+    };
+  });
 
-  /* 정적 데모의 가상 계정에는 플랫폼 원문 URL을 꾸며 넣지 않는다. 실제 연동 데이터만 originalUrl을 가진다. */
-  discoveryItems.forEach(item => {
-    Object.assign(item, {
-      mode: 'demo',
-      mediaType: 'image',
-      previewUrl: item.image,
-      originalUrl: null,
-      assetUrl: item.image,
-      rightsStatus: 'reference-only'
+  /* viral score = 그룹 내 핵심 지표(조회·热度 또는 분당 좋아요) 상대 순위를 76~99로 정규화.
+     소스마다 지표 단위가 달라 그룹별로 따로 순위를 매긴다. */
+  const scoreGroups = {};
+  discoveryItems.forEach(item => (scoreGroups[item.group] = scoreGroups[item.group] || []).push(item));
+  Object.values(scoreGroups).forEach(group => {
+    [...group].sort((a, b) => a.rankValue - b.rankValue).forEach((item, rank) => {
+      item.score = group.length > 1 ? Math.round(76 + (rank / (group.length - 1)) * 23) : 90;
     });
   });
+
+  function formatMetric(value) {
+    return typeof value === 'number' ? formatNumber(value) : String(value ?? '—');
+  }
 
   const state = {
     activeView: 'overview',
@@ -182,15 +206,25 @@
     });
   }
 
+  function discoveryMedia(item, extra = '') {
+    if (item.mediaType === 'hashtag') {
+      return `<div class="discovery-media hashtag-media" ${extra}><span class="hashtag-big">${escapeHTML(item.hashtag || item.title)}</span>`;
+    }
+    return `<div class="discovery-media" style="background-image:url('${item.image}')" ${extra}>`;
+  }
+
   function renderDiscovery() {
     let list = [...discoveryItems];
-    if (state.platform !== 'all') list = list.filter(item => item.platform === state.platform);
+    if (state.platform !== 'all') {
+      list = state.platform === 'Global'
+        ? list.filter(item => item.group !== 'IG-Media')
+        : list.filter(item => item.vertical === state.platform);
+    }
     if (state.query) {
       const query = state.query.toLocaleLowerCase('ko');
-      list = list.filter(item => `${item.title} ${item.creator} ${item.platform}`.toLocaleLowerCase('ko').includes(query));
+      list = list.filter(item => `${item.title} ${item.creator} ${item.platform} ${item.topic} ${item.vertical || ''}`.toLocaleLowerCase('ko').includes(query));
     }
     list.sort((a, b) => {
-      if (state.sort === 'velocity') return b.velocity - a.velocity;
       if (state.sort === 'views') return b.views - a.views;
       return b.score - a.score;
     });
@@ -201,20 +235,20 @@
       const cls = platformClass(item.platform);
       return `
         <article class="discovery-card" data-id="${item.id}">
-          <div class="discovery-media" style="background-image:url('${item.image}')" tabindex="0" role="button" aria-label="${escapeHTML(item.title)} 원본 보기">
+          ${discoveryMedia(item, `tabindex="0" role="button" aria-label="${escapeHTML(item.title)} 원본 보기"`)}
             <span class="card-platform"><i class="${cls}"></i>${escapeHTML(item.platform)}</span>
             <span class="viral-badge"><span>VIRAL</span><b>${item.score}</b></span>
-            <span class="velocity-badge"><svg><use href="#i-bolt"/></svg>+${item.velocity}/분</span>
-            <span class="play-button"><svg><use href="#i-play"/></svg></span>
+            <span class="velocity-badge"><svg><use href="#i-bolt"/></svg>${escapeHTML(item.badge)}</span>
+            ${item.mediaType === 'video' ? '<span class="play-button"><svg><use href="#i-play"/></svg></span>' : ''}
           </div>
           <div class="discovery-body">
-            <div class="creator-row"><span class="creator-avatar">${item.avatar}</span><b>${escapeHTML(item.creator)}</b><span>· ${item.age}</span></div>
+            <div class="creator-row"><span class="creator-avatar">${item.avatar}</span><b>${escapeHTML(item.creator)}</b><span>· ${escapeHTML(item.age)}</span></div>
             <h3>${escapeHTML(item.title)}</h3>
-            <div class="card-stats"><span><svg><use href="#i-play"/></svg>${formatNumber(item.views)}</span><span><svg><use href="#i-heart"/></svg>${formatNumber(item.likes)}</span><span><svg><use href="#i-trend"/></svg>${((item.likes / item.views) * 100).toFixed(1)}%</span></div>
-            <div class="source-badges"><span class="source-badge snapshot">1분 snapshot 차분</span><span class="source-badge">10분 관측</span><span class="source-badge">방금 전 갱신</span><span class="source-badge">${escapeHTML(item.source)}</span><span class="source-badge rights">권리 확인 필요</span></div>
+            <div class="card-stats">${item.views > 0 ? `<span><svg><use href="#i-play"/></svg>${formatNumber(item.views)}</span>` : item.likes != null ? `<span><svg><use href="#i-heart"/></svg>좋아요 ${formatNumber(item.likes)}</span>` : ''}<span><svg><use href="#i-heart"/></svg>${escapeHTML(item.metricLabel)} ${formatMetric(item.metricValue)}</span>${item.topic ? `<span><svg><use href="#i-trend"/></svg>${escapeHTML(item.topic)}</span>` : ''}</div>
+            <div class="source-badges">${item.vertical ? `<span class="source-badge snapshot">${escapeHTML(item.vertical)}</span>` : ''}<span class="source-badge">${escapeHTML(item.source)}</span><span class="source-badge rights">레퍼런스 · 권리 확인 필요</span></div>
             <div class="card-actions">
               <button class="card-original"><svg><use href="#i-play"/></svg>원본 보기</button>
-              <button class="card-action"><svg><use href="#i-edit"/></svg>Studio에서 만들기</button>
+              <button class="card-action"><svg><use href="#i-edit"/></svg>Studio에서 트위스트</button>
             </div>
           </div>
         </article>`;
@@ -233,11 +267,12 @@
   }
 
   function renderOverviewSignals() {
-    $('#overviewSignals').innerHTML = discoveryItems.slice(0, 4).map(item => `
+    const top = [...discoveryItems].sort((a, b) => b.score - a.score).slice(0, 4);
+    $('#overviewSignals').innerHTML = top.map(item => `
       <button class="signal-item" data-signal-id="${item.id}">
-        <span class="signal-thumb" style="background-image:url('${item.image}')"></span>
+        <span class="signal-thumb" style="${item.image ? `background-image:url('${item.image}')` : 'background:linear-gradient(135deg,#2768ff,#725cff)'}"></span>
         <span class="signal-item-copy"><strong>${escapeHTML(item.title)}</strong><span>${escapeHTML(item.platform)} · ${escapeHTML(item.creator)}</span></span>
-        <span class="velocity"><b>+${item.velocity}/분</b><small>좋아요 증가</small></span>
+        <span class="velocity"><b>${escapeHTML(item.badge)}</b><small>${escapeHTML(item.age)}</small></span>
       </button>`).join('');
     $$('[data-signal-id]').forEach(button => button.addEventListener('click', () => openDiscoveryDetail(Number(button.dataset.signalId))));
   }
@@ -257,10 +292,13 @@
     state.selected = id;
     localStorage.setItem(STORAGE.selected, id);
     delete state.studio.customImage;
+    const item = discoveryItems.find(entry => entry.id === id);
+    if (item) state.studio.format = item.mediaType === 'video' ? 'reel' : 'feed';
     saveJSON(STORAGE.studio, state.studio);
+    applyStudioState();
     updateStudioReference();
     showView('studio');
-    showToast('Studio로 가져왔어요', '원본을 재사용하지 않고 구조와 아이디어만 참고합니다.');
+    showToast('레퍼런스를 캔버스에 불러왔어요', '원본 위에서 트위스트 시안을 잡아보세요. 원본 요소를 그대로 게시하려면 권리 확인이 필요합니다.');
   }
 
   function openDiscoveryDetail(id) {
@@ -268,8 +306,44 @@
     if (!item) return;
     state.detailId = id;
     const cls = platformClass(item.platform);
-    $('#originalPreview').style.backgroundImage = `url('${item.previewUrl}')`;
-    $('#originalPreview').classList.toggle('is-video', item.mediaType === 'video');
+    const preview = $('#originalPreview');
+    preview.style.backgroundImage = item.previewUrl ? `url('${item.previewUrl}')` : 'linear-gradient(135deg,#2768ff,#725cff)';
+    preview.classList.toggle('is-video', item.mediaType === 'video');
+    let hashtagBig = $('.hashtag-big', preview);
+    if (item.mediaType === 'hashtag') {
+      if (!hashtagBig) {
+        hashtagBig = document.createElement('span');
+        hashtagBig.className = 'hashtag-big';
+        preview.appendChild(hashtagBig);
+      }
+      hashtagBig.hidden = false;
+      hashtagBig.textContent = item.hashtag || item.title;
+    } else if (hashtagBig) {
+      hashtagBig.hidden = true;
+    }
+    let previewVideo = $('video', preview);
+    if (item.mediaType === 'video') {
+      if (!previewVideo) {
+        previewVideo = document.createElement('video');
+        previewVideo.muted = true;
+        previewVideo.loop = true;
+        previewVideo.autoplay = true;
+        previewVideo.playsInline = true;
+        previewVideo.controls = true;
+        preview.appendChild(previewVideo);
+      }
+      previewVideo.hidden = false;
+      previewVideo.poster = item.previewUrl;
+      if (previewVideo.dataset.src !== item.assetUrl) {
+        previewVideo.src = item.assetUrl;
+        previewVideo.dataset.src = item.assetUrl;
+      }
+      previewVideo.play().catch(() => { /* autoplay policy */ });
+    } else if (previewVideo) {
+      previewVideo.pause();
+      previewVideo.hidden = true;
+    }
+    $('.original-play', preview).hidden = item.mediaType === 'video';
     $('#originalPlatform').innerHTML = `<i class="${cls}"></i>${escapeHTML(item.platform)}`;
     $('#originalStatus').textContent = item.mode === 'live' ? 'LIVE SOURCE' : 'DEMO SAMPLE';
     $('#originalStatus').classList.toggle('live', item.mode === 'live');
@@ -277,24 +351,29 @@
     $('#originalCreator').textContent = item.creator;
     $('#originalAge').textContent = `· ${item.age}`;
     $('#originalContentTitle').textContent = item.title;
-    $('#originalViews').textContent = formatNumber(item.views);
-    $('#originalLikes').textContent = formatNumber(item.likes);
-    $('#originalVelocity').textContent = `+${item.velocity}/분`;
+    const isLikesFirst = item.group === 'IG-Media';
+    $('#originalViewsLabel').textContent = item.platform === 'Douyin' ? '热度' : (isLikesFirst ? '좋아요' : '조회');
+    $('#originalViews').textContent = formatNumber(isLikesFirst ? (item.likes || 0) : item.views);
+    $('#originalLikesLabel').textContent = item.metricLabel;
+    $('#originalLikes').textContent = formatMetric(item.metricValue);
+    $('#originalVelocityLabel').textContent = '급상승';
+    $('#originalVelocity').textContent = item.badge;
     $('#originalScore').textContent = item.score;
     $('#originalSource').textContent = item.source;
-    $('#originalRightsCopy').textContent = item.mode === 'live'
-      ? '수집된 원문 링크입니다. 제작 전 저작권과 플랫폼 정책을 확인하세요.'
-      : '실제 플랫폼 게시물이 아닌 UI 시연용 샘플입니다. 아래 링크는 샘플 이미지 출처로 연결됩니다.';
+    $('#originalRightsCopy').textContent = '외부 크리에이터/플랫폼의 급상승 콘텐츠입니다. 구조·훅·포맷을 분석해 트위스트 제작에 활용하고, 원본 요소를 그대로 쓰려면 게시 전 권리 확인이 필요합니다.';
     const external = $('#originalExternalLink');
     const href = item.originalUrl || item.assetUrl;
     external.hidden = !href;
     if (href) external.href = href;
-    $('span', external).textContent = item.originalUrl ? '플랫폼 원본 콘텐츠 보기' : '샘플 원본 이미지 보기';
+    $('span', external).textContent = `${item.platform} 원본 보기`;
     const dialog = $('#discoveryDetailModal');
     if (!dialog.open) dialog.showModal();
   }
 
   function setupDiscoveryDetail() {
+    $('#discoveryDetailModal').addEventListener('close', () => {
+      $('#originalPreview video')?.pause();
+    });
     $('#useDiscoveryReference').addEventListener('click', () => {
       const id = state.detailId;
       $('#discoveryDetailModal').close();
@@ -308,16 +387,46 @@
   function updateStudioReference() {
     const item = discoveryItems.find(entry => entry.id === state.selected);
     if (item) {
-      $('#inspirationThumb').style.backgroundImage = `url('${item.image}')`;
+      $('#inspirationThumb').style.backgroundImage = item.image ? `url('${item.image}')` : 'linear-gradient(135deg,#2768ff,#725cff)';
       $('#inspirationTitle').textContent = item.title;
-      $('#inspirationMeta').textContent = `Viral ${item.score} · +${item.velocity}/분 · ${item.platform} · 구조 분석용`;
+      $('#inspirationMeta').textContent = `Viral ${item.score} · ${item.badge} · ${item.creator} · 레퍼런스 리믹스`;
       $('#viewOriginalReference').hidden = false;
     } else {
       $('#viewOriginalReference').hidden = true;
     }
-    /* 레퍼런스 원본은 작은 참고 썸네일에만 두고 제작 캔버스에는 재사용하지 않는다. */
-    const previewImage = state.studio.customImage || images.brandDefault;
-    $('.canvas-image').style.backgroundImage = `url('${previewImage}')`;
+    /* 선택한 레퍼런스의 실제 미디어(로컬 저장본)를 캔버스에 올려 트위스트 시안을 잡는다.
+       로컬 업로드(customImage)가 있으면 업로드가 우선. 미디어가 없는 항목(해시태그)은 브랜드 기본 자산. */
+    const canvas = $('#socialCanvas');
+    let canvasVideo = $('.canvas-video', canvas);
+    const useOriginal = item && item.assetUrl && !state.studio.customImage;
+    if (useOriginal && item.mediaType === 'video') {
+      if (!canvasVideo) {
+        canvasVideo = document.createElement('video');
+        canvasVideo.className = 'canvas-video';
+        canvasVideo.muted = true;
+        canvasVideo.loop = true;
+        canvasVideo.autoplay = true;
+        canvasVideo.playsInline = true;
+        canvas.insertBefore(canvasVideo, $('.canvas-gradient', canvas));
+      }
+      canvasVideo.hidden = false;
+      canvasVideo.poster = item.previewUrl;
+      if (canvasVideo.dataset.src !== item.assetUrl) {
+        canvasVideo.src = item.assetUrl;
+        canvasVideo.dataset.src = item.assetUrl;
+      }
+      canvasVideo.play().catch(() => { /* autoplay policy */ });
+      $('.canvas-image').style.backgroundImage = `url('${item.previewUrl}')`;
+    } else {
+      if (canvasVideo) { canvasVideo.pause(); canvasVideo.hidden = true; }
+      const previewImage = state.studio.customImage || (useOriginal ? item.assetUrl : images.brandDefault);
+      $('.canvas-image').style.backgroundImage = `url('${previewImage}')`;
+    }
+  }
+
+  function selectedStudioThumb() {
+    const item = discoveryItems.find(entry => entry.id === state.selected);
+    return state.studio.customImage || item?.previewUrl || images.brandDefault;
   }
 
   function makeStudioPreview(source) {
@@ -427,6 +536,8 @@
       }
       const reader = new FileReader();
       reader.addEventListener('load', async () => {
+        const canvasVideo = $('.canvas-video');
+        if (canvasVideo) { canvasVideo.pause(); canvasVideo.hidden = true; }
         $('.canvas-image').style.backgroundImage = `url('${reader.result}')`;
         try {
           state.studio.customImage = await makeStudioPreview(reader.result);
@@ -447,7 +558,8 @@
     const savedText = readJSON('pulse.studioText', null);
     if (savedText) {
       hookInput.value = savedText.hook || hookInput.value;
-      captionInput.value = savedText.caption || captionInput.value;
+      /* 구버전 저장분의 리터럴 \n 문자열을 실제 줄바꿈으로 정리 */
+      captionInput.value = (savedText.caption || captionInput.value).replace(/\\n/g, '\n');
       $('#toneSelect').value = savedText.tone || 'confident';
     }
     $('#toneSelect').addEventListener('change', saveStudioText);
@@ -514,7 +626,8 @@
   }
 
   function updateSourceCount() {
-    const count = 8 + state.sources.length;
+    const baseCreators = new Set(discoveryItems.map(item => item.creator)).size;
+    const count = baseCreators + state.sources.length;
     $('#sourceSummary').innerHTML = `<b>${count}</b>개 계정`;
   }
 
@@ -562,7 +675,7 @@
       state.queue.unshift({
         id: Date.now(), title: $('#hookInput').value.trim().slice(0, 50) || data.get('caption').split('\n')[0].slice(0, 50) || '새 콘텐츠', channels,
         platform: channels[0], date: data.get('date'), time: data.get('time'), format: state.studio.format === 'reel' ? '릴스' : '피드',
-        image: state.studio.customImage || images.brandDefault, demo: true,
+        image: selectedStudioThumb(), demo: true,
         creative: {
           sourceId: state.selected, layout: state.studio.layout, color: state.studio.color, align: state.studio.align,
           hook: $('#hookInput').value, caption: data.get('caption'), tone: $('#toneSelect').value
@@ -588,7 +701,7 @@
     form.elements.date.value = dateFromToday(1);
     form.elements.time.value = '19:00';
     form.elements.caption.value = $('#captionInput').value;
-    $('.media-preview-small > div').style.backgroundImage = `url('${state.studio.customImage || images.brandDefault}')`;
+    $('.media-preview-small > div').style.backgroundImage = `url('${selectedStudioThumb()}')`;
     $('.media-preview-small small').textContent = state.studio.format === 'reel' ? '1080 × 1920 · 릴스' : '1080 × 1350 · 피드';
     openModal('scheduleModal');
   }
@@ -640,8 +753,9 @@
   }
 
   function renderAnalyticsTable() {
-    $('#analyticsTable').innerHTML = discoveryItems.slice(0, 5).map((item, index) => `
-      <tr><td><div class="content-cell"><i style="background-image:url('${item.image}')"></i><span><strong>${escapeHTML(item.title)}</strong></span></div></td><td>${escapeHTML(item.platform)}</td><td>2026.07.${28 - index}</td><td><strong>${formatNumber(item.views)}</strong></td><td>${(8.9 - index * .4).toFixed(1)}%</td><td>${formatNumber(Math.round(item.likes * .22))}</td><td><span class="performance-tag">상위 ${6 + index * 3}%</span></td></tr>`).join('');
+    const top = [...discoveryItems].sort((a, b) => b.views - a.views).slice(0, 5);
+    $('#analyticsTable').innerHTML = top.map(item => `
+      <tr><td><div class="content-cell"><i style="${item.image ? `background-image:url('${item.image}')` : 'background:linear-gradient(135deg,#2768ff,#725cff)'}"></i><span><strong>${escapeHTML(item.title)}</strong></span></div></td><td>${escapeHTML(item.creator)}</td><td>${escapeHTML(item.age)}</td><td><strong>${formatNumber(item.views)}</strong></td><td>${escapeHTML(item.badge)}</td><td>${escapeHTML(item.metricLabel)} ${formatMetric(item.metricValue)}</td><td><span class="performance-tag">Viral ${item.score}</span></td></tr>`).join('');
   }
 
   function setupAds() {
@@ -701,6 +815,17 @@
     renderOverviewSignals();
     renderAnalyticsTable();
     updateStudioReference();
+    const totalCount = $('#discoveryTotalCount');
+    if (totalCount) totalCount.textContent = discoveryItems.length;
+    const navCount = $('#discoveryNavCount');
+    if (navCount) navCount.textContent = discoveryItems.length;
+    if (window.TRENDING_FETCHED_AT) {
+      const stamp = window.TRENDING_FETCHED_AT;
+      const topbar = $('#topbarFetchedAt');
+      if (topbar) topbar.textContent = `${stamp} 수집 · TikTok CC · Douyin 热点榜 · KR 해시태그`;
+      const label = $('#fetchedAtLabel');
+      if (label) label.textContent = `${stamp} 수집 스냅샷`;
+    }
   }
 
   document.addEventListener('DOMContentLoaded', init);
