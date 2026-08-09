@@ -488,3 +488,58 @@ html[data-theme="dark"] .platform-dot.tiktok, html[data-theme="dark"] .channel-l
 .hashtag-big { position: absolute; inset: 0; display: grid; place-items: center; z-index: 1; color: #fff; font-size: 30px; font-weight: 900; letter-spacing: -.02em; text-shadow: 0 4px 22px rgba(0,0,0,.35); padding: 16px; text-align: center; word-break: break-all; }
 .hashtag-big[hidden] { display: none; }
 .original-preview .hashtag-big { font-size: 40px; }
+
+/* ---- 모바일 최적화 (가독성·탭 영역·가로 스크롤 방지, 데스크톱 영향 없음) ---- */
+@media (max-width: 760px) {
+  /* 페이지 전체 가로 스크롤 금지 — clip은 스크롤 컨테이너를 만들지 않아 sticky topbar에 안전 */
+  html, body { overflow-x: clip; }
+
+  /* iOS 사파리 입력 포커스 자동 확대 방지 (16px 미만 입력 필드가 원인) */
+  .search-field input, .select, .input, .textarea, .tag-input input, .compact-select { font-size: 16px; }
+  .search-field { height: 46px; }
+  .tag-input input { height: 30px; }
+
+  /* 본문 가독성 — 핵심 읽기 텍스트 13px 수준으로 상향 */
+  .demo-banner strong { font-size: 14px; }
+  .demo-banner p { font-size: 13px; }
+  .signal-item-copy strong { font-size: 14px; }
+  .signal-item-copy span { font-size: 12px; }
+  .velocity b { font-size: 14px; }
+  .task strong { font-size: 13px; }
+  .task small { font-size: 11px; }
+  .insight-summary { font-size: 13px; }
+  .insight-list div { font-size: 11px; }
+  .reason-list b { font-size: 12px; }
+  .reason-list p { font-size: 11px; }
+  .queue-copy strong { font-size: 13px; }
+  .queue-copy span { font-size: 11px; }
+  .card-stats { font-size: 11px; }
+  .discovery-summary span { font-size: 11px; }
+  .inspiration-bar strong { font-size: 13px; }
+  .inspiration-bar small { font-size: 11px; }
+  .canvas-tip span { font-size: 12px; }
+  .canvas-tip button { font-size: 11px; padding: 7px 10px; }
+  .brand-policy b { font-size: 12px; }
+  .brand-policy span { font-size: 11px; }
+  .field-group > label, .field-group > span, .field-group label { font-size: 12px; }
+  .original-metrics span { font-size: 11px; }
+  .original-metrics b { font-size: 16px; }
+  .modal-head p { font-size: 12px; }
+  .info-box b { font-size: 12px; }
+  .info-box p { font-size: 11px; }
+  .channel-status-grid strong { font-size: 12px; }
+  .channel-status-grid small { font-size: 10px; }
+  .campaign-title strong { font-size: 13px; }
+  .campaign-title span { font-size: 11px; }
+  th, td { font-size: 12px; }
+
+  /* 탭(터치) 영역 확보 */
+  .filter-chip { min-height: 40px; font-size: 12px; }
+  .mini-action { min-height: 34px; padding: 6px 9px; font-size: 12px; }
+  .card-original, .card-action { min-height: 42px; font-size: 11px; }
+  .control-tabs button { height: 40px; font-size: 12px; }
+  .segmented button { min-height: 40px; font-size: 12px; }
+  .tab-pills button { min-height: 36px; font-size: 11px; }
+  .mobile-nav button { font-size: 10px; gap: 3px; }
+  .mobile-nav svg { width: 21px; height: 21px; }
+}
